@@ -109,7 +109,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'website.wsgi.application'
-SITE_ID = 3
+SITE_ID = os.environ.get('SITE_ID')
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
@@ -125,7 +125,43 @@ DATABASES = {
     }
 }
 
+from urllib.parse import urlparse
 
+redis_url = urlparse(os.environ.get('REDIS_URL'))
+CACHES = {
+    "default": {
+         "BACKEND": "redis_cache.RedisCache",
+         "LOCATION": "{0}:{1}".format(redis_url.hostname, redis_url.port),
+         "OPTIONS": {
+             "PASSWORD": redis_url.password,
+             "DB": 0,
+         }
+    }
+}
+
+es_url = os.environ.get('SEARCHBOX_URL') or 'http://127.0.0.1:9200/'
+es = urlparse(es_url)
+port = es.port or 80
+
+#HAYSTACK_CONNECTIONS = {
+#    'default': {
+#        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+#        'URL': es.scheme + '://' + es.hostname + ':' + str(port),
+#        'INDEX_NAME': 'documents',
+#    },
+#}
+
+WAGTAILSEARCH_BACKENDS = {
+    'default': {
+        'BACKEND': 'wagtail.wagtailsearch.backends.elasticsearch2',
+        'URLS': es_url,
+        'INDEX': 'wagtail',
+        'TIMEOUT': 5
+    }
+}
+
+#if es.username:
+#    HAYSTACK_CONNECTIONS['default']['KWARGS'] = {"http_auth": es.username + ':' + es.password}
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
@@ -167,5 +203,5 @@ WAGTAIL_SITE_NAME = "cos"
 BASE_URL = 'http://example.com'
 
 EL_PAGINATION_PER_PAGE=10
-
+DATA_UPLOAD_MAX_NUMBER_FIELDS=10000
 DEFAULT_FOOTER_ID = 1
