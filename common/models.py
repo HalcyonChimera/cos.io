@@ -133,6 +133,16 @@ class FormPage(AbstractEmailForm):
         blank=True,
         help_text='Optional action for the form. This will default to the slug.'
     )
+    menu_order = IntegerField(blank=True, null=True, help_text=(
+        'The order this page should appear in the menu. '
+        'The lower the number, the more left the page will appear. '
+        'This is required for all pages where "Show in menus" is checked.'
+    ))
+
+    promote_panels = Page.promote_panels + [
+        FieldPanel('menu_order'),
+    ]
+
 
     content_panels = AbstractEmailForm.content_panels + [
         FieldPanel('intro', classname="full"),
@@ -347,6 +357,11 @@ class CustomPage(Page, index.Indexed):
     ], null=True, blank=True)
 
     custom_url = CharField(max_length=256, default='', null=True, blank=True)
+    menu_order = IntegerField(blank=True, null=True, help_text=(
+        'The order this page should appear in the menu. '
+        'The lower the number, the more left the page will appear. '
+        'This is required for all pages where "Show in menus" is checked.'
+    ))
 
     search_fields = [
         index.SearchField('content', partial_match=True),
@@ -359,6 +374,7 @@ class CustomPage(Page, index.Indexed):
 
     promote_panels = Page.promote_panels + [
         FieldPanel('custom_url'),
+        FieldPanel('menu_order'),
         InlinePanel('versioned_redirects', label='URL Versioning'),
     ]
 
@@ -479,6 +495,16 @@ class NewsIndexPage(Page):
     )
 
     statement = CharField(blank=True, max_length=1000)
+
+    menu_order = IntegerField(blank=True, null=True, help_text=(
+        'The order this page should appear in the menu. '
+        'The lower the number, the more left the page will appear. '
+        'This is required for all pages where "Show in menus" is checked.'
+    ))
+
+    promote_panels = Page.promote_panels + [
+        FieldPanel('menu_order'),
+    ]
 
     content_panels = Page.content_panels + [
         FieldPanel('statement', classname="full"),

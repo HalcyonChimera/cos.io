@@ -12,6 +12,17 @@ def get_site_root(context):
 def has_menu_children(page):
     return page.get_children().live().in_menu().exists()
 
+def get_menu_order(page):
+    ret = -1
+    options = ['custompage', 'blogindexpage', 'formpage', 'newsindexpage', 'pagealias' ]
+    for opt in options:
+        try:
+            ret = getattr(page, opt).menu_order
+        except:
+            continue
+        else:
+            return ret
+    return ret
 # Retrieves the top menu items - the immediate children of the parent page
 # The has_menu_children method is necessary because the bootstrap menu requires
 # a dropdown class to be applied to a parent
@@ -27,7 +38,7 @@ def top_menu(context, parent, calling_page=None):
                            if calling_page else False)
     return {
         'calling_page': calling_page,
-        'menuitems': menuitems,
+        'menuitems': sorted(menuitems, key=get_menu_order),
         # required by the pageurl tag that we want to use within this template
         'request': context['request'],
     }
